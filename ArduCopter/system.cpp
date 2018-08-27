@@ -276,6 +276,7 @@ void Copter::init_ardupilot()
     if (arming.rc_calibration_checks(true)) {
         enable_motor_output();
     }
+    //enable_motor_output();
 
     // disable safety if requested
     BoardConfig.init_safety();

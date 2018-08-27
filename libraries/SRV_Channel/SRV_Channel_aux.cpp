@@ -50,6 +50,7 @@ void SRV_Channel::output_ch(void)
             }
         }
     }
+    //hal.uartC->printf("func:%s disabled_mask:%08X ch_num:%08X output_pwm:%d\n", __func__, SRV_Channels::disabled_mask, ch_num, output_pwm);
     if (!(SRV_Channels::disabled_mask & (1U<<ch_num))) {
         hal.rcout->write(ch_num, output_pwm);
     }
@@ -60,6 +61,7 @@ void SRV_Channel::output_ch(void)
  */
 void SRV_Channels::output_ch_all(void)
 {
+    //hal.uartC->printf("func:%s NUM_SERVO_CHANNELS:%d\n", __func__, NUM_SERVO_CHANNELS);
     for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
         channels[i].output_ch();
     }
@@ -190,6 +192,7 @@ void SRV_Channels::set_output_pwm(SRV_Channel::Aux_servo_function_t function, ui
     if (!function_assigned(function)) {
         return;
     }
+    //hal.uartC->printf("func:%s function:%d value:%d\n", __func__, function, value);
     for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
         if (channels[i].function.get() == function) {
             channels[i].set_output_pwm(value);
@@ -209,6 +212,7 @@ SRV_Channels::set_output_pwm_trimmed(SRV_Channel::Aux_servo_function_t function,
     if (!function_assigned(function)) {
         return;
     }
+    hal.uartC->printf("func:%s function:%d value:%d\n", __func__, function, value);
     for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
         if (channels[i].function.get() == function) {
             int16_t value2;
@@ -249,6 +253,7 @@ SRV_Channels::copy_radio_in_out(SRV_Channel::Aux_servo_function_t function, bool
     if (!function_assigned(function)) {
         return;
     }
+    hal.uartC->printf("func:%s function:%d do_input_output:%d\n", __func__, function, do_input_output);
     for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
         if (channels[i].function.get() == function) {
             RC_Channel *rc = RC_Channels::rc_channel(channels[i].ch_num);

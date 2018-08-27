@@ -167,7 +167,9 @@ static THD_FUNCTION(main_loop,arg)
     sdcard_init();
 
     hal.uartB->begin(38400);
+	//hal.uartB->begin(57600);
     hal.uartC->begin(57600);
+	//hal.uartC->printf("FMUv4 setup done\n");
     hal.analogin->init();
     hal.scheduler->init();
 

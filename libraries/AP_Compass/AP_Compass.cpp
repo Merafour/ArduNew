@@ -275,7 +275,8 @@ const AP_Param::GroupInfo Compass::var_info[] = {
     // @Description: Enable or disable the second compass for determining heading.
     // @Values: 0:Disabled,1:Enabled
     // @User: Advanced
-    AP_GROUPINFO("USE2",    18, Compass, _state[1].use_for_yaw, 1),
+    //AP_GROUPINFO("USE2",    18, Compass, _state[1].use_for_yaw, 1),
+	AP_GROUPINFO("USE2",    18, Compass, _state[1].use_for_yaw, 0),
 
     // @Param: ORIENT2
     // @DisplayName: Compass2 orientation
@@ -296,7 +297,8 @@ const AP_Param::GroupInfo Compass::var_info[] = {
     // @Description: Enable or disable the third compass for determining heading.
     // @Values: 0:Disabled,1:Enabled
     // @User: Advanced
-    AP_GROUPINFO("USE3",    21, Compass, _state[2].use_for_yaw, 1),
+    //AP_GROUPINFO("USE3",    21, Compass, _state[2].use_for_yaw, 1),
+	AP_GROUPINFO("USE3",    21, Compass, _state[2].use_for_yaw, 0),
 
     // @Param: ORIENT3
     // @DisplayName: Compass3 orientation
@@ -468,6 +470,7 @@ Compass::Compass(void)
 bool
 Compass::init()
 {
+    hal.console->printf("Compass::init()\n");
     if (_compass_count == 0) {
         // detect available backends. Only called once
         _detect_backends();
@@ -514,18 +517,44 @@ bool Compass::_driver_enabled(enum DriverType driver_type)
     return (mask & uint32_t(_driver_type_mask.get())) == 0;
 }
 
+
+/**
+ * make a bus id given bus type, bus number, bus address and
+ * device type This is for use by devices that do not use one of
+ * the standard HAL Device types, such as UAVCAN devices
+static uint32_t make_bus_id(enum BusType bus_type, uint8_t bus, uint8_t address, uint8_t devtype) {
+    union DeviceId d {};
+    d.devid_s.bus_type = bus_type;
+    d.devid_s.bus = bus;
+    d.devid_s.address = address;
+    d.devid_s.devtype = devtype;
+    return d.devid;
+}
+
+ * return a new bus ID for the same bus connection but a new device type.
+ * This is used for auxillary bus connections
+
+static uint32_t change_bus_id(uint32_t old_id, uint8_t devtype) {
+    union DeviceId d;
+    d.devid = old_id;
+    d.devid_s.devtype = devtype;
+    return d.devid;
+} */
 /*
   wrapper around hal.i2c_mgr->get_device() that prevents duplicate devices being opened
  */
 bool Compass::_have_i2c_driver(uint8_t bus, uint8_t address) const
 {
+    hal.console->printf("Compass::_have_i2c_driver...1...%d\n", AP_HAL::Device::make_bus_id(AP_HAL::Device::BUS_TYPE_I2C, bus, address, 0));
     for (uint8_t i=0; i<_compass_count; i++) {
         if (AP_HAL::Device::make_bus_id(AP_HAL::Device::BUS_TYPE_I2C, bus, address, 0) ==
             AP_HAL::Device::change_bus_id(uint32_t(_state[i].dev_id.get()), 0)) {
             // we are already using this device
+            hal.console->printf("Compass::_have_i2c_driver...2\n");
             return true;
         }
     }
+    hal.console->printf("Compass::_have_i2c_driver...3\n");
     return false;
 }
 
@@ -662,6 +691,7 @@ void Compass::_detect_backends(void)
         return;
     }
 
+    hal.console->printf("Compass::_detect_backends()\n");
 #if AP_FEATURE_BOARD_DETECT
     if (AP_BoardConfig::get_board_type() == AP_BoardConfig::PX4_BOARD_PIXHAWK2) {
         // default to disabling LIS3MDL on pixhawk2 due to hardware issue
@@ -911,8 +941,11 @@ void Compass::_detect_backends(void)
     ADD_BACKEND(DRIVER_MAG3110, AP_Compass_MAG3110::probe(*this, GET_I2C_DEVICE(HAL_MAG3110_I2C_BUS, HAL_MAG3110_I2C_ADDR), ROTATION_NONE),
                 AP_Compass_MAG3110::name, true);
 #elif HAL_COMPASS_DEFAULT == HAL_COMPASS_IST8310
+    hal.console->printf("HAL_COMPASS_IST8310\n");
     ADD_BACKEND(DRIVER_IST8310, AP_Compass_IST8310::probe(*this, GET_I2C_DEVICE(HAL_COMPASS_IST8310_I2C_BUS, HAL_COMPASS_IST8310_I2C_ADDR),
                                                            true, ROTATION_PITCH_180_YAW_90), AP_Compass_IST8310::name, true);
+//    ADD_BACKEND(DRIVER_QMC5883, AP_Compass_QMC5883L::probe(*this, GET_I2C_DEVICE(1, HAL_COMPASS_QMC5883L_I2C_ADDR),
+//                                                           true,ROTATION_ROLL_180), AP_Compass_QMC5883L::name, true);
 #elif HAL_COMPASS_DEFAULT == HAL_COMPASS_QMC5883L
     ADD_BACKEND(DRIVER_QMC5883, AP_Compass_QMC5883L::probe(*this, GET_I2C_DEVICE(1, HAL_COMPASS_QMC5883L_I2C_ADDR),
                                                            true,ROTATION_ROLL_180),

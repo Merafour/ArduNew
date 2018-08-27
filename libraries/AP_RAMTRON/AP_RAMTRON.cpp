@@ -42,12 +42,18 @@ bool AP_RAMTRON::init(void)
         return false;
     }
 
+    hal.uartC->printf("%s\n", __FUNCTION__);
     struct rdid {
         uint8_t manufacturer[6];
         uint8_t memory;
         uint8_t id1;
         uint8_t id2;
     } rdid;
+    //dev->read_registers(RAMTRON_RDID, (uint8_t *)&rdid, sizeof(rdid));
+    //dev->read_registers(0x00, (uint8_t *)&rdid, sizeof(rdid));
+    dev->read_registers(0x00, (uint8_t *)&(rdid.id1), 1);
+    dev->read_registers(0x01, (uint8_t *)&(rdid.id2), 1);
+    hal.uartC->printf("%s id1:%d id2:%d %d, %d\n", __FUNCTION__, rdid.id1, rdid.id2, rdid.manufacturer[0], rdid.manufacturer[1]);
     if (!dev->read_registers(RAMTRON_RDID, (uint8_t *)&rdid, sizeof(rdid))) {
         dev->get_semaphore()->give();
         return false;

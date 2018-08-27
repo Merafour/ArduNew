@@ -708,6 +708,12 @@ AP_InertialSensor::detect_backends(void)
                                                   HAL_INS_DEFAULT_ROTATION));
 #elif HAL_INS_DEFAULT == HAL_INS_MPU60XX_I2C
     ADD_BACKEND(AP_InertialSensor_Invensense::probe(*this, hal.i2c_mgr->get_device(HAL_INS_MPU60x0_I2C_BUS, HAL_INS_MPU60x0_I2C_ADDR)));
+#elif HAL_INS_DEFAULT == HAL_INS_ICM20608_SPI
+        // only do fast samplng on ICM-20608. The MPU9250 doesn't handle high rate well when it has a mag enabled
+        _fast_sampling_mask.set_default(1);
+        //ADD_BACKEND(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_ICM20608_NAME), ROTATION_ROLL_180_YAW_90));
+        ADD_BACKEND(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_ICM20608_NAME)));
+        //ADD_BACKEND(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME), ROTATION_ROLL_180_YAW_90));
 #elif HAL_INS_DEFAULT == HAL_INS_BH
     ADD_BACKEND(AP_InertialSensor_Invensense::probe(*this, hal.i2c_mgr->get_device(HAL_INS_MPU60x0_I2C_BUS, HAL_INS_MPU60x0_I2C_ADDR)));
     ADD_BACKEND(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME)));

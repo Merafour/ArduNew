@@ -59,6 +59,7 @@ void Copter::init_rc_out()
 
     // update rate must be set after motors->init() to allow for motor mapping
     motors->set_update_rate(g.rc_speed);
+    hal.uartC->printf("func:%s g.rc_speed:%d\n", __func__, g.rc_speed);
 
 #if FRAME_CONFIG != HELI_FRAME
     motors->set_throttle_range(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());

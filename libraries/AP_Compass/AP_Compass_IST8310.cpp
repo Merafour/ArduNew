@@ -80,16 +80,19 @@ AP_Compass_Backend *AP_Compass_IST8310::probe(Compass &compass,
                                               bool force_external,
                                               enum Rotation rotation)
 {
+    hal.console->printf("AP_Compass_IST8310::probe...0\n");
     if (!dev) {
         return nullptr;
     }
 
+    hal.console->printf("AP_Compass_IST8310::probe...1\n");
     AP_Compass_IST8310 *sensor = new AP_Compass_IST8310(compass, std::move(dev), force_external, rotation);
     if (!sensor || !sensor->init()) {
         delete sensor;
         return nullptr;
     }
 
+    hal.console->printf("AP_Compass_IST8310::probe...3\n");
     return sensor;
 }
 

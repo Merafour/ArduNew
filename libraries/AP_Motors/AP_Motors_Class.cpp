@@ -108,9 +108,13 @@ void AP_Motors::rc_set_freq(uint32_t mask, uint16_t freq_hz)
         _motor_fast_mask |= mask;
     }
 
+    hal.uartC->printf("func:%s mask:%08X\n", __func__, (unsigned int)mask);
     mask = rc_map_mask(mask);
+    hal.uartC->printf("func:%s mask:%08X\n", __func__, (unsigned int)mask);
+    hal.uartC->printf("func:%s freq_hz:%d\n", __func__, freq_hz);
     hal.rcout->set_freq(mask, freq_hz);
 
+    hal.uartC->printf("func:%s _pwm_type:%d\n", __func__, _pwm_type.get());
     switch (pwm_type(_pwm_type.get())) {
     case PWM_TYPE_ONESHOT:
         if (freq_hz > 50 && mask != 0) {

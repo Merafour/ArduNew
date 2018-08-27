@@ -96,6 +96,7 @@ const AP_Param::GroupInfo AP_MotorsMulticopter::var_info[] = {
     // @Range: 0 2000
     // @User: Advanced
     AP_GROUPINFO("PWM_MIN", 16, AP_MotorsMulticopter, _pwm_min, 0),
+    //AP_GROUPINFO("PWM_MIN", 16, AP_MotorsMulticopter, _pwm_min, 1000),
 
     // @Param: PWM_MAX
     // @DisplayName: PWM output maximum
@@ -104,6 +105,7 @@ const AP_Param::GroupInfo AP_MotorsMulticopter::var_info[] = {
     // @Range: 0 2000
     // @User: Advanced
     AP_GROUPINFO("PWM_MAX", 17, AP_MotorsMulticopter, _pwm_max, 0),
+    //AP_GROUPINFO("PWM_MAX", 17, AP_MotorsMulticopter, _pwm_max, 2000),
 
     // @Param: SPIN_MIN
     // @DisplayName: Motor Spin minimum
@@ -147,6 +149,7 @@ const AP_Param::GroupInfo AP_MotorsMulticopter::var_info[] = {
     // @Values: 0:PWM enabled while disarmed, 1:PWM disabled while disarmed
     // @User: Advanced
     AP_GROUPINFO("SAFE_DISARM", 23, AP_MotorsMulticopter, _disarm_disable_pwm, 0),
+    //AP_GROUPINFO("SAFE_DISARM", 23, AP_MotorsMulticopter, _disarm_disable_pwm, 1),
 
     // @Param: YAW_SV_ANGLE
     // @DisplayName: Yaw Servo Max Lean Angle
@@ -248,9 +251,15 @@ void AP_MotorsMulticopter::output_boost_throttle(void)
 // sends minimum values out to the motors
 void AP_MotorsMulticopter::output_min()
 {
+#if 1
     set_desired_spool_state(DESIRED_SHUT_DOWN);
     _spool_mode = SHUT_DOWN;
     output();
+#else
+    set_desired_spool_state(DESIRED_SPIN_WHEN_ARMED);
+    _spool_mode = SPIN_WHEN_ARMED;
+    output();
+#endif
 }
 
 // update the throttle input filter

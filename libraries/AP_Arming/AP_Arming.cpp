@@ -47,7 +47,8 @@ const AP_Param::GroupInfo AP_Arming::var_info[] = {
     // @Bitmask: 0:All,1:Barometer,2:Compass,3:GPS lock,4:INS,5:Parameters,6:RC Channels,7:Board voltage,8:Battery Level,10:Logging Available,11:Hardware safety switch,12:GPS Configuration
     // @Bitmask{Plane}: 0:All,1:Barometer,2:Compass,3:GPS lock,4:INS,5:Parameters,6:RC Channels,7:Board voltage,8:Battery Level,9:Airspeed,10:Logging Available,11:Hardware safety switch,12:GPS Configuration
     // @User: Standard
-    AP_GROUPINFO("CHECK",        2,     AP_Arming,  checks_to_perform,       ARMING_CHECK_ALL),
+    //AP_GROUPINFO("CHECK",        2,     AP_Arming,  checks_to_perform,       ARMING_CHECK_ALL),
+	AP_GROUPINFO("CHECK",        2,     AP_Arming,  checks_to_perform,       0),
 
     // @Param: ACCTHRESH
     // @DisplayName: Accelerometer error threshold

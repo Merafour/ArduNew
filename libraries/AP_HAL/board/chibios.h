@@ -82,3 +82,6 @@
 #define HAL_I2C_INTERNAL_MASK 1
 #endif
 
+// my add
+#define HAL_COMPASS_IST8310_I2C_BUS 0
+

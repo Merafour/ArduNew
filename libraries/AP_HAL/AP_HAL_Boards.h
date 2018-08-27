@@ -95,6 +95,8 @@
 #define HAL_INS_RST         21
 #define HAL_INS_LSM9DS1     22
 #define HAL_INS_ICM20789_SPI 23
+#define HAL_INS_ICM20608_SPI  32
+
 
 /* Barometer driver types */
 #define HAL_BARO_NONE        0

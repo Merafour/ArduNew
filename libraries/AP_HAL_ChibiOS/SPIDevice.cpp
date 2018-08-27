@@ -316,6 +316,7 @@ SPIDeviceManager::get_device(const char *name)
     uint8_t i;
     for (i = 0; i<ARRAY_SIZE_SIMPLE(device_table); i++) {
         if (strcmp(device_table[i].name, name) == 0) {
+	    printf("SPI: device name: %s\n", name);
             break;
         }
     }

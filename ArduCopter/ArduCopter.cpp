@@ -206,6 +206,36 @@ void Copter::setup()
 
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks), MASK_LOG_PM);
+#if 0
+	for(int len=0; len<10; len++)
+	{
+		hal.console->printf("watting... %d\n", len);
+		hal.scheduler->delay(1000);
+	}
+	hal.console->printf("FMUv4 setup done\n");
+	hal.console->printf("FMUv4 setup done: %d\n", hal.util->safety_switch_state());
+	hal.console->printf("motors->armed: %d\n", motors->armed());
+	// arm and enable motors
+    motors->armed(true);
+	hal.console->printf("motors->armed: %d\n", motors->armed());
+	hal.console->printf("motors->get_motor_mask: %02X\n", motors->get_motor_mask());
+    SRV_Channels::enable_by_mask(motors->get_motor_mask());
+    hal.util->set_soft_armed(true);
+
+    // raise throttle to maximum
+    SRV_Channels::cork();
+    motors->set_throttle_passthrough_for_esc_calibration(1.0f);
+    SRV_Channels::push();
+
+    // delay for 5 seconds while outputting pulses
+    while (1) {
+        SRV_Channels::cork();
+        motors->set_throttle_passthrough_for_esc_calibration(1.0f);
+        SRV_Channels::push();
+        esc_calibration_notify();
+        hal.scheduler->delay(3);
+    }
+#endif
 }
 
 void Copter::loop()
@@ -260,6 +290,7 @@ void Copter::fast_loop()
     if (should_log(MASK_LOG_ANY)) {
         Log_Sensor_Health();
     }
+	//hal.uartC->printf("FMUv4 setup done\n");
 }
 
 // rc_loops - reads user input from transmitter/receiver

@@ -155,6 +155,7 @@ void RCOutput::set_freq_group(pwm_group &group)
         pwmStart(group.pwm_drv, &group.pwm_cfg);
         group.pwm_started = true;
     }
+    hal.uartC->printf("func:%s frequency:%d period:%d\n", __func__, group.pwm_cfg.frequency, group.pwm_cfg.period);
     pwmChangePeriod(group.pwm_drv, group.pwm_cfg.period);
 }
 
@@ -223,11 +224,13 @@ void RCOutput::set_default_rate(uint16_t freq_hz)
 #endif
     for (uint8_t i = 0; i < NUM_GROUPS; i++ ) {
         pwm_group &group = pwm_group_list[i];
+        //hal.uartC->printf("func:%s freq_hz:%02X fast_channel_mask:%08X\n", __func__, group.ch_mask, fast_channel_mask);
         if ((group.ch_mask & fast_channel_mask) || group.ch_mask == 0) {
             // don't change fast channels
             continue;
         }
         group.pwm_cfg.period = group.pwm_cfg.frequency/freq_hz;
+        hal.uartC->printf("func:%s period:%02X pwm_started:%08X\n", __func__, group.pwm_cfg.period, group.pwm_started);
         if (group.pwm_started) {
             pwmChangePeriod(group.pwm_drv, group.pwm_cfg.period);
         }
@@ -301,6 +304,7 @@ void RCOutput::disable_ch(uint8_t chan)
 
 void RCOutput::write(uint8_t chan, uint16_t period_us)
 {
+    //hal.uartC->printf("func:%s chan:%d max_channels:%d chan_offset:%d period_us:%d\n", __func__, chan, max_channels, chan_offset, period_us);
     if (chan >= max_channels) {
         return;
     }
@@ -321,11 +325,16 @@ void RCOutput::write(uint8_t chan, uint16_t period_us)
     if (chan < chan_offset) {
         return;
     }
-    
+#if 0//ndef HAL_GPIO_PIN_LED_SAFETY
+    if(safety_state != AP_HAL::Util::SAFETY_ARMED) force_safety_off();
+#endif
+    //period_us = 300;
+    //hal.uartC->printf("func:%s chan:%d safety:%d DISARMED:%d _mask:%d\n", __func__, chan, safety_state, AP_HAL::Util::SAFETY_DISARMED, safety_mask);
     if (safety_state == AP_HAL::Util::SAFETY_DISARMED && !(safety_mask & (1U<<chan))) {
         // implement safety pwm value
         period_us = safe_pwm[chan];
     }
+    //period_us = 300;
 
     chan -= chan_offset;
 
@@ -344,6 +353,7 @@ void RCOutput::write(uint8_t chan, uint16_t period_us)
  */
 void RCOutput::push_local(void)
 {
+    //hal.uartC->printf("func:%s active:%d outmask:%08X\n", __func__, active_fmu_channels, (1U<<active_fmu_channels)-1);
     if (active_fmu_channels == 0) {
         return;
     }
@@ -362,6 +372,8 @@ void RCOutput::push_local(void)
         if (!group.pwm_started) {
             continue;
         }
+        //hal.uartC->printf("func:%s active_fmu_channels:%d\n", __func__, active_fmu_channels);
+        //hal.uartC->printf("func:%s safety_on:%d, safety_mask:%d\n", __func__, safety_on, safety_mask);
         for (uint8_t j = 0; j < 4; j++) {
             uint8_t chan = group.chan[j];
             if (chan == CHAN_DISABLED) {
@@ -392,6 +404,7 @@ void RCOutput::push_local(void)
                 } else if (group.current_mode < MODE_PWM_DSHOT150) {
                     uint32_t width = (group.pwm_cfg.frequency/1000000U) * period_us;
                     pwmEnableChannel(group.pwm_drv, j, width);
+                    //hal.uartC->printf("func:%s j:%d, width:%d\n", __func__, j, width);
                 } else if (group.current_mode >= MODE_PWM_DSHOT150 && group.current_mode <= MODE_PWM_DSHOT1200) {
                     // set period_us to time for pulse output, to enable very fast rates
                     period_us = dshot_pulse_time_us;
@@ -577,7 +590,7 @@ void RCOutput::set_group_mode(pwm_group &group)
         pwmStop(group.pwm_drv);
         group.pwm_started = false;
     }
-    
+    hal.uartC->printf("func:%s current_mode:%02X fast_channel_mask:%08X\n", __func__, group.current_mode, fast_channel_mask);
     switch (group.current_mode) {
     case MODE_PWM_BRUSHED:
         // force zero output initially
@@ -643,6 +656,7 @@ void RCOutput::set_output_mode(uint16_t mask, enum output_mode mode)
 {
     for (uint8_t i = 0; i < NUM_GROUPS; i++ ) {
         pwm_group &group = pwm_group_list[i];
+        hal.uartC->printf("func:%s ch_mask:%02X fast_channel_mask:%08X\n", __func__, group.ch_mask, fast_channel_mask);
         if (((group.ch_mask << chan_offset) & mask) == 0) {
             // this group is not affected
             continue;
@@ -1279,7 +1293,16 @@ AP_HAL::Util::safety_state RCOutput::_safety_switch_state(void)
         return iomcu.get_safety_switch_state();
     }
 #endif
+#if 1
     return safety_state;
+#else
+#ifdef HAL_GPIO_PIN_LED_SAFETY
+    return safety_state;
+#else
+    force_safety_off();
+    return safety_state;
+#endif
+#endif
 }
 
 /*

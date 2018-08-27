@@ -723,6 +723,7 @@ void AP_InertialSensor_Invensense::_set_filter_register(void)
 bool AP_InertialSensor_Invensense::_check_whoami(void)
 {
     uint8_t whoami = _register_read(MPUREG_WHOAMI);
+	printf("INS: whoami: 0x%02X\n", whoami);
     switch (whoami) {
     case MPU_WHOAMI_6000:
         _mpu_type = Invensense_MPU6000;
@@ -735,6 +736,7 @@ bool AP_InertialSensor_Invensense::_check_whoami(void)
         _mpu_type = Invensense_MPU9250;
         return true;
     case MPU_WHOAMI_20608:
+	case MPU_WHOAMI_20600:
         _mpu_type = Invensense_ICM20608;
         return true;
     case MPU_WHOAMI_20602:
